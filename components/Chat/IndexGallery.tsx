@@ -65,7 +65,7 @@ export const IndexGallery = (
     <>
       <div className="flex-1 space-y-4 p-8 pt-6 pb-48">
         <div className="flex items-center justify-between space-y-2">
-          <h2 className="text-3xl font-bold text-black tracking-tight dark:text-white">My created vector</h2>
+          <h2 className="text-3xl font-bold text-black tracking-tight dark:text-white">My created - Presentation</h2>
         </div>
         <Tabs defaultValue="created" className="space-y-4">
           <TabsList>
@@ -93,7 +93,7 @@ export const IndexGallery = (
           </TabsContent>
         </Tabs>
         <div className="flex items-center justify-between space-y-2">
-          <h2 className="text-3xl text-black font-bold tracking-tight dark:text-white">Vector Hub</h2>
+          <h2 className="text-3xl text-black font-bold tracking-tight dark:text-white">Presentation AI - Content</h2>
         </div>
         {isIndexesLoading ? (
             <IndexSkeleton/>
