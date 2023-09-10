@@ -8,11 +8,14 @@ import {CodeBlock} from '../Markdown/CodeBlock';
 import {MemoizedReactMarkdown} from '../Markdown/MemoizedReactMarkdown';
 import {CopyButton} from './CopyButton';
 import {Message} from "@/types/chat";
+import { SpeechButton } from './SpeechButton';
 
 interface Props {
   message: Message;
   messageIndex: number;
   onEditMessage: (message: Message, messageIndex: number) => void;
+  speaking: boolean,
+  setSpeaking: (speaking: boolean) => void
 }
 
 export const ChatMessage: FC<Props> = memo(
@@ -22,6 +25,7 @@ export const ChatMessage: FC<Props> = memo(
     const [isHovering, setIsHovering] = useState<boolean>(false);
     const [messageContent, setMessageContent] = useState(message.content);
     const [messagedCopied, setMessageCopied] = useState(false);
+    const [speaking, setSpeaking] = useState<boolean>(false);
 
     const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -63,6 +67,22 @@ export const ChatMessage: FC<Props> = memo(
         }, 2000);
       });
     };
+
+    const speechOnToggle = () => {
+      if (speaking) {
+        window.speechSynthesis.cancel();
+        setSpeaking(false);
+      } else {
+        const utterance = new SpeechSynthesisUtterance(message.content);
+        //set indonesia language and indonesian voice 
+        const voices = speechSynthesis.getVoices().filter(voice => voice.voiceURI === 'Microsoft Gadis Online (Natural) - Indonesian (Indonesia)' && voice.lang === 'id-ID');
+        if (voices.length > 0) {
+          utterance.voice = voices[0];
+        }
+        window.speechSynthesis.speak(utterance);
+        setSpeaking(true);
+      }
+    }
 
     useEffect(() => {
       if (textareaRef.current) {
@@ -199,10 +219,16 @@ export const ChatMessage: FC<Props> = memo(
                 </MemoizedReactMarkdown>
 
                 {(isHovering || window.innerWidth < 640) && (
-                  <CopyButton
-                    messagedCopied={messagedCopied}
-                    copyOnClick={copyOnClick}
-                  />
+                  <div>
+                    <CopyButton
+                      messagedCopied={messagedCopied}
+                      copyOnClick={copyOnClick}
+                    />
+                    <SpeechButton
+                      speechOnToggle={speechOnToggle}
+                      speaking={speaking}
+                    />
+                  </div>
                 )}
               </>
             )}
