@@ -19,8 +19,6 @@ import {KeyConfiguration} from "@/types/keyConfiguration";
 import {getSession} from 'next-auth/react';
 import {now} from "next-auth/client/_utils";
 
-import { useSpeachSynthesisApi } from "@/lib/tts";
-
 interface HomeProps {
   serverSideApiKeyIsSet: boolean;
 }
@@ -258,26 +256,6 @@ const Home: React.FC<HomeProps> = ({serverSideApiKeyIsSet}) => {
       saveConversations(updatedConversations);
 
       setMessageIsStreaming(false);
-	  
-	  //tambah disini text to speech tts
-      const {
-        setText,
-        isSpeaking,
-        isPaused,
-        isResumed,
-        isEnded,
-        speak,
-        pause,
-        resume,
-        cancel,
-      } = useSpeachSynthesisApi();
-	  
-      setText(text);
-      
-	  useEffect(() => {
-        speak();
-      }, []); 
-	  
     }
   };
 
