@@ -1,21 +1,21 @@
-import {IconEdit} from '@tabler/icons-react';
-import {useTranslation} from 'next-i18next';
-import {FC, memo, useEffect, useRef, useState} from 'react';
+import { IconEdit } from '@tabler/icons-react';
+import { useTranslation } from 'next-i18next';
+import { FC, memo, useEffect, useRef, useState } from 'react';
 import rehypeMathjax from 'rehype-mathjax';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
-import {CodeBlock} from '../Markdown/CodeBlock';
-import {MemoizedReactMarkdown} from '../Markdown/MemoizedReactMarkdown';
-import {CopyButton} from './CopyButton';
-import {Message} from "@/types/chat";
+import { CodeBlock } from '../Markdown/CodeBlock';
+import { MemoizedReactMarkdown } from '../Markdown/MemoizedReactMarkdown';
+import { CopyButton } from './CopyButton';
+import { Message } from '@/types/chat';
 import { SpeechButton } from './SpeechButton';
 
 interface Props {
   message: Message;
   messageIndex: number;
   onEditMessage: (message: Message, messageIndex: number) => void;
-  speaking: boolean,
-  setSpeaking: (speaking: boolean) => void
+  speaking: boolean;
+  setSpeaking: (speaking: boolean) => void;
 }
 
 export const ChatMessage: FC<Props> = memo(
@@ -74,15 +74,19 @@ export const ChatMessage: FC<Props> = memo(
         setSpeaking(false);
       } else {
         const utterance = new SpeechSynthesisUtterance(message.content);
-        //set indonesia language and indonesian voice 
-        const voices = speechSynthesis.getVoices().filter(voice => voice.voiceURI === 'Microsoft Gadis Online (Natural) - Indonesian (Indonesia)' && voice.lang === 'id-ID');
+        // Set the language to Indonesian (Indonesia)
+        utterance.lang = 'id-ID';
+        // Get the available voices and filter for Indonesian voices
+        const voices = window.speechSynthesis
+          .getVoices()
+          .filter((voice) => voice.lang === 'id-ID');
         if (voices.length > 0) {
           utterance.voice = voices[0];
         }
         window.speechSynthesis.speak(utterance);
         setSpeaking(true);
       }
-    }
+    };
 
     useEffect(() => {
       if (textareaRef.current) {

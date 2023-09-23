@@ -31,7 +31,7 @@ export const IndexFormTabs = (
               <CardHeader>
                 <CardTitle className="ml-10">FileLoader</CardTitle>
                 <CardDescription className="ml-10">
-                  Use File to upload your vector.
+                  Use File (pdf, epub, docx, txt, md, csv, json, zip) to upload your vector.
                 </CardDescription>
               </CardHeader>
               <FileLoaderForm keyConfiguration={keyConfiguration}
