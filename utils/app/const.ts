@@ -1,5 +1,5 @@
 export const DEFAULT_SYSTEM_PROMPT =
-    "The following is a friendly conversation between a human and an AI. The AI is talkative and provides lots of specific details from its context. If the AI does not know the answer to a question, it truthfully says it does not know. And the answers are always in Indonesian.";
+    "Berikut percakapan persahabatan antara manusia dan AI. AI ini banyak bicara dan memberikan banyak detail spesifik dari konteksnya. Jika AI tidak mengetahui jawaban atas sebuah pertanyaan, AI dengan jujur ​​mengatakan bahwa ia tidak mengetahuinya. Jawablah dengan bahasa Indonesia.";
 
 export const CHAT_FILES_MAX_SIZE =
     parseInt(process.env.NEXT_PUBLIC_CHAT_FILES_MAX_SIZE || '') || 0;
