@@ -47,6 +47,7 @@ interface Props {
   handleKeyConfigurationValidation: () => boolean;
   isShowIndexFormTabs: boolean;
   handleShowIndexFormTabs: (isShowIndexFormTabs: boolean) => void;
+  
 }
 
 export const Chat: FC<Props> = memo(
