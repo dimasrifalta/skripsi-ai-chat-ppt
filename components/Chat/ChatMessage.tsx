@@ -14,8 +14,6 @@ interface Props {
   message: Message;
   messageIndex: number;
   onEditMessage: (message: Message, messageIndex: number) => void;
-  speaking: boolean;
-  setSpeaking: (speaking: boolean) => void;
 }
 
 export const ChatMessage: FC<Props> = memo(
