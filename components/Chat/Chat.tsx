@@ -1,17 +1,18 @@
-import {throttle} from '@/utils';
-import {IconClearAll} from '@tabler/icons-react';
-import {useTranslation} from 'next-i18next';
-import {FC, memo, MutableRefObject, useEffect, useRef, useState} from 'react';
-import {ChatInput} from './ChatInput';
-import {ChatLoader} from './ChatLoader';
-import {ChatMessage} from './ChatMessage';
-import {KeyValuePair, Message} from "@/types/chat";
-import {Conversation} from "@/types/conversation";
-import {KeyConfiguration} from "@/types/keyConfiguration";
-import {IndexGallery} from "@/components/Chat/IndexGallery";
-import {IndexFormTabs} from "@/components/Chat/IndexFormTabs";
-import {Button} from "@/components/ui/button";
-import {Eraser, FileUp, Heart} from "lucide-react";
+import { throttle } from '@/utils';
+import { IconClearAll } from '@tabler/icons-react';
+import { useTranslation } from 'next-i18next';
+import { FC, memo, MutableRefObject, useEffect, useRef, useState } from 'react';
+import { ChatInput } from './ChatInput';
+import { ChatLoader } from './ChatLoader';
+import { ChatMessage } from './ChatMessage';
+import { KeyValuePair, Message } from '@/types/chat';
+import { Conversation } from '@/types/conversation';
+import { KeyConfiguration } from '@/types/keyConfiguration';
+import { IndexGallery } from '@/components/Chat/IndexGallery';
+import { IndexFormTabs } from '@/components/Chat/IndexFormTabs';
+import { Button } from '@/components/ui/button';
+import { Eraser, FileUp, Heart } from 'lucide-react';
+import pptxgen from 'pptxgenjs';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,7 +23,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
+} from '@/components/ui/alert-dialog';
 import {
   Card,
   CardContent,
@@ -30,7 +31,10 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
+} from '@/components/ui/card';
+import { any } from 'zod';
+import path from 'path';
+import { Progress } from '@radix-ui/react-progress';
 
 interface Props {
   conversation: Conversation;
@@ -47,24 +51,23 @@ interface Props {
   handleKeyConfigurationValidation: () => boolean;
   isShowIndexFormTabs: boolean;
   handleShowIndexFormTabs: (isShowIndexFormTabs: boolean) => void;
-  
 }
 
 export const Chat: FC<Props> = memo(
   ({
-     conversation,
-     keyConfiguration,
-     messageIsStreaming,
-     loading,
-     onSend,
-     onUpdateConversation,
-     onEditMessage,
-     stopConversationRef,
-     handleKeyConfigurationValidation,
-     isShowIndexFormTabs,
-     handleShowIndexFormTabs,
-   }) => {
-    const {t} = useTranslation('chat');
+    conversation,
+    keyConfiguration,
+    messageIsStreaming,
+    loading,
+    onSend,
+    onUpdateConversation,
+    onEditMessage,
+    stopConversationRef,
+    handleKeyConfigurationValidation,
+    isShowIndexFormTabs,
+    handleShowIndexFormTabs,
+  }) => {
+    const { t } = useTranslation('chat');
     const [currentMessage, setCurrentMessage] = useState<Message>();
     const [autoScrollEnabled, setAutoScrollEnabled] = useState(true);
     const [chatInputContent, setChatInputContent] = useState<string>('');
@@ -72,6 +75,9 @@ export const Chat: FC<Props> = memo(
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const chatContainerRef = useRef<HTMLDivElement>(null);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
+    const [isUploading, setIsUploading] = useState<boolean>(false);
+    const [isUploadSuccess, setIsUploadSuccess] = useState<boolean>(false);
+    const [uploadProgress, setUploadProgress] = useState<number>(0);
 
     const scrollDown = () => {
       if (autoScrollEnabled) {
@@ -82,7 +88,14 @@ export const Chat: FC<Props> = memo(
 
     const handleChatInputContent = (content: string) => {
       setChatInputContent(content);
-    }
+    };
+
+    useEffect(() => {
+      const interval = setInterval(() => {
+        setUploadProgress((progress) => (progress + 1) % 101);
+      }, 50);
+      return () => clearInterval(interval);
+    }, []);
 
     useEffect(() => {
       throttledScrollDown();
@@ -116,15 +129,17 @@ export const Chat: FC<Props> = memo(
     }, [messagesEndRef]);
 
     const onDownloadFileUpload = async () => {
-      
       try {
         console.log(conversation);
-        const res = await fetch(`/api/files/?filename=${conversation.index.id}`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
+        const res = await fetch(
+          `/api/files/?filename=${conversation.index.id}`,
+          {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+            },
           },
-        });
+        );
         if (!res.ok) {
           throw new Error(`download file failed:, ${conversation.index.id}`);
         }
@@ -136,17 +151,187 @@ export const Chat: FC<Props> = memo(
         //get full file name with extension from response header
         const contentDisposition = res.headers.get('Content-Disposition');
         console.log(contentDisposition);
-        const fileName = contentDisposition?.split('filename=')[1]?.replace(/"/g, '');
+        const fileName = contentDisposition
+          ?.split('filename=')[1]
+          ?.replace(/"/g, '');
         a.download = fileName ? fileName : conversation.index.id;
         a.click();
         a.remove();
         window.URL.revokeObjectURL(url);
       } catch (e) {
+        alert('file upload tidak ditemukan!!');
         console.log(e);
       }
-      
     };
 
+    const handlePpt = async () => {
+      var topic = '';
+      var slideNum = 6;
+      var bulletMin = 3;
+      var bulletMax = 5;
+      var extra = '';
+      let powerpoint = '';
+      let response: Response;
+      const controller = new AbortController();
+      let prompt = `
+      create a power point script based on context, response should be in a JSON format similar to the following:
+      {
+          "title": "powerPointTitle",
+          "slides": [
+              {
+                  "title": "titleName",
+                  "content": [
+                      "string","string","string",...
+                  ]
+              },
+      ...}
+    Must be ${slideNum} slides long and each content array should have ${bulletMin}-${bulletMax} bullet points for the slide. ${extra}
+      `;
+
+      if (!handleKeyConfigurationValidation()) {
+        return;
+      }
+
+      response = await fetch(
+        `/api/query?message=${prompt}&indexId=${conversation.index.id}`,
+        {
+          method: 'GET',
+          headers: {
+            'x-api-type': keyConfiguration.apiType ?? '',
+            'x-api-key': keyConfiguration.apiKey ?? '',
+            'x-api-model': keyConfiguration.apiModel ?? '',
+            'x-azure-api-key': keyConfiguration.azureApiKey ?? '',
+            'x-azure-instance-name': keyConfiguration.azureInstanceName ?? '',
+            'x-azure-api-version': keyConfiguration.azureApiVersion ?? '',
+            'x-azure-deployment-name':
+              keyConfiguration.azureDeploymentName ?? '',
+            'x-azure-embedding-deployment-name':
+              keyConfiguration.azureEmbeddingDeploymentName ?? '',
+          },
+        },
+      );
+      if (!response.ok) {
+        const message = await response.text();
+        console.log('chat failed: ', message);
+        alert(`error message: ' ${message}`);
+        return;
+      }
+
+      if (!response?.body) {
+        const message = await response.text();
+        console.log('chat failed: ', message);
+        alert(`error message: ' ${message}`);
+        return;
+      }
+
+      const reader = response.body.getReader();
+      const stream = new ReadableStream({
+        start(controller) {
+          // The following function handles each data chunk
+          function push() {
+            // "done" is a Boolean and value a "Uint8Array"
+            reader.read().then(({ done, value }) => {
+              // Is there no more data to read?
+              if (done) {
+                // Tell the browser that we have finished sending data
+                controller.close();
+                return;
+              }
+
+              // Get the data and send it to the browser via the controller
+              controller.enqueue(value);
+              push();
+            });
+          }
+
+          push();
+        },
+      });
+
+      const responseStream = new Response(stream, {
+        headers: { 'Content-Type': 'text/html' },
+      });
+
+      const readerStream = responseStream.body?.getReader();
+      if (!readerStream) {
+        console.log('Reader stream is null');
+        return;
+      }
+      const decoder = new TextDecoder();
+      let result = '';
+      let done = false;
+      let value: any;
+      let chunk = '';
+      let index = 0;
+      while (!done) {
+        ({ done, value } = await readerStream.read());
+        if (done) {
+          break;
+        }
+        chunk = decoder.decode(value);
+        result += chunk;
+        index++;
+      }
+      console.log(result);
+      powerpoint = JSON.parse(result.replace('\n', ''));
+      return powerpoint;
+    };
+
+    const generatePowerPoint = async () => {
+      // Start the loading indicator
+      setIsUploading(true);
+      try {
+        let powerpoint: any = await handlePpt();
+
+        console.log(powerpoint);
+
+        let pres = new pptxgen();
+        let titleSlideRef = pres.addSlide();
+        titleSlideRef.addText(powerpoint.title, {
+          h: '100%',
+          w: '100%',
+          align: 'center',
+          bold: true,
+          fontSize: 50,
+        });
+
+        powerpoint.slides.forEach((slide: any) => {
+          let slideRef = pres.addSlide();
+          let bulletCount = 0;
+          slideRef.addText(slide.title, {
+            y: 0.5,
+            h: 0.5,
+            w: '100%',
+            align: 'center',
+            bold: true,
+            fontSize: 24,
+          });
+          slide.content.forEach((bullet: any) => {
+            slideRef.addText(bullet, {
+              x: 1.5,
+              y: 1.5 + 0.85 * bulletCount,
+              h: 0.25,
+              bullet: true,
+            });
+            bulletCount++;
+          });
+        });
+
+        await pres.writeFile({
+          fileName: `${powerpoint.title}.pptx`,
+        });
+
+        console.log('complete');
+      } catch (err) {
+        console.log('error:', err);
+        setIsUploading(false);
+        setIsUploadSuccess(false);
+      } finally {
+        setIsUploading(false);
+        setIsUploadSuccess(true);
+        console.log('complete');
+      }
+    };
 
     return (
       <>
@@ -241,13 +426,32 @@ export const Chat: FC<Props> = memo(
                     </Card>
 
                     <div className="bg-neutral-20 flex items-center justify-center border border-b-neutral-300 py-2 text-lg text-neutral-500 dark:border-none dark:bg-[#444654] dark:text-neutral-200">
-                      <Button variant="link" >
-                        <FileUp className="mr-2" /> Generate PPT
-                      </Button>
-
-                      <Button variant="link" onClick={() => onDownloadFileUpload()}>
-                        <FileUp className="mr-2" /> Download File Upload
-                      </Button>
+                      <>
+                        {isUploading ? (
+                          <>
+                            <Progress
+                              value={80}
+                              className="ml-16 w-[60%]"
+                            />
+                          </>
+                        ) : (
+                          <>
+                        
+                            <Button
+                              variant="link"
+                              onClick={() => generatePowerPoint()}
+                            >
+                              <FileUp className="mr-2" /> Generate PPT
+                            </Button>
+                            <Button
+                              variant="link"
+                              onClick={() => onDownloadFileUpload()}
+                            >
+                              <FileUp className="mr-2" /> Download File Upload
+                            </Button>
+                          </>
+                        )}
+                      </>
                     </div>
 
                     {conversation.messages.map((message, index) => (
