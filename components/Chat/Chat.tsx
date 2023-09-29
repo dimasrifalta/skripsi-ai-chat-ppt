@@ -13,6 +13,8 @@ import { IndexFormTabs } from '@/components/Chat/IndexFormTabs';
 import { Button } from '@/components/ui/button';
 import { Eraser, FileUp, Heart } from 'lucide-react';
 import pptxgen from 'pptxgenjs';
+import {Progress} from "../ui/progress";
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -34,7 +36,6 @@ import {
 } from '@/components/ui/card';
 import { any } from 'zod';
 import path from 'path';
-import { Progress } from '@radix-ui/react-progress';
 
 interface Props {
   conversation: Conversation;
@@ -430,7 +431,7 @@ export const Chat: FC<Props> = memo(
                         {isUploading ? (
                           <>
                             <Progress
-                              value={80}
+                              value={uploadProgress}
                               className="ml-16 w-[60%]"
                             />
                           </>
