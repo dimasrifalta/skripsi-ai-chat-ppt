@@ -159,9 +159,9 @@ export const Chat: FC<Props> = memo(
         a.click();
         a.remove();
         window.URL.revokeObjectURL(url);
-      } catch (e) {
-        alert('file upload tidak ditemukan!!');
+      } catch (e) {        
         console.log(e);
+        alert('file upload tidak ditemukan!!');
       }
     };
 
@@ -322,11 +322,12 @@ export const Chat: FC<Props> = memo(
           fileName: `${powerpoint.title}.pptx`,
         });
 
-        console.log('complete');
       } catch (err) {
         console.log('error:', err);
         setIsUploading(false);
         setIsUploadSuccess(false);
+        alert('Generate PPT gagal. Content tidak sesuai.');
+
       } finally {
         setIsUploading(false);
         setIsUploadSuccess(true);
