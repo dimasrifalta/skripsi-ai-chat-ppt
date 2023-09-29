@@ -1,28 +1,38 @@
 {
-    "version": "0.2.0",
-    "configurations": [
-      {
-        "name": "Next.js: debug server-side",
-        "type": "node-terminal",
-        "request": "launch",
-        "command": "npm run dev"
-      },
-      {
-        "name": "Next.js: debug client-side",
-        "type": "chrome",
-        "request": "launch",
-        "url": "http://localhost:3000"
-      },
-      {
-        "name": "Next.js: debug full stack",
-        "type": "node-terminal",
-        "request": "launch",
-        "command": "npm run dev",
-        "serverReadyAction": {
-          "pattern": "started server on .+, url: (https?://.+)",
-          "uriFormat": "%s",
-          "action": "debugWithChrome"
-        }
-      }
-    ]
-  }
+  "configurations": [
+    {
+      "name": "Launch Chrome",
+      "request": "launch",
+      "type": "pwa-chrome",
+      "url": "http://localhost:3000",
+      "webRoot": "${workspaceFolder}/frontend"
+    },
+    {
+      "name": "Attach to Edge",
+      "port": 9222,
+      "request": "attach",
+      "type": "pwa-msedge",
+      "webRoot": "${workspaceFolder}/frontend"
+    },
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "Launch Chrome against localhost",
+      "url": "http://localhost:3000",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Launch Edge",
+      "request": "launch",
+      "type": "pwa-msedge",
+      "url": "http://localhost:3000",
+      "webRoot": "${workspaceFolder}/frontend"
+    },
+    {
+      "name": "Launch Microsoft Edge and open the Edge DevTools",
+      "request": "launch",
+      "type": "vscode-edge-devtools.debug",
+      "url": "http://localhost:3000" // Provide your project's url to finish configuring
+    }
+  ]
+}

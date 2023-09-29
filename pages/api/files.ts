@@ -1,8 +1,9 @@
 import type {NextApiRequest, NextApiResponse} from 'next'
 import multer from "multer";
-import fs from 'fs';
+import fs, { createReadStream } from 'fs';
 import AdmZip from 'adm-zip';
 import {NEXT_PUBLIC_CHAT_FILES_UPLOAD_PATH} from "@/utils/app/const";
+import path from 'path';
 
 export const config = {
     api: {
@@ -61,6 +62,43 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             console.log('File does not exist');
         }
     }
+
+    //download file from server to client
+    else if (req.method === 'GET') {   
+        console.log("file name: ", req.query);
+        const { filename } = req.query;
+
+       // Replace 'uploads' with the path to your folder containing the files
+        const folderPathDownload = path.join(process.cwd(), folderPath);
+        const files = fs.readdirSync(folderPathDownload);
+
+        try {
+
+            // Find the file with a name that matches the provided index (without extension)
+            const matchingFile = files.find((file) => file.split('.')[0] === filename);
+            console.log("matching file: ", matchingFile);
+            if (matchingFile) {
+            const filePath = path.join(folderPathDownload, matchingFile);
+            console.log("file path: ", filePath);
+
+            // Set the appropriate headers for the download
+            res.setHeader('Content-Disposition', `attachment; filename="${matchingFile}"`);
+            res.setHeader('Content-Type', 'application/octet-stream');
+
+            // Send the file to the client
+            fs.createReadStream(filePath).pipe(res);
+            } else {
+            res.status(404).end('File not found');
+            }
+
+          } catch (error) {
+            console.error('Error downloading file:', error);
+            res.status(500).end('Internal Server Error');
+          }
+
+    }
+
+
 
 }
 

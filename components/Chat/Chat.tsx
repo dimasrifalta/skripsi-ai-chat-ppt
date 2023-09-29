@@ -11,7 +11,7 @@ import {KeyConfiguration} from "@/types/keyConfiguration";
 import {IndexGallery} from "@/components/Chat/IndexGallery";
 import {IndexFormTabs} from "@/components/Chat/IndexFormTabs";
 import {Button} from "@/components/ui/button";
-import {Eraser, Heart} from "lucide-react";
+import {Eraser, FileUp, Heart} from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -115,12 +115,47 @@ export const Chat: FC<Props> = memo(
       };
     }, [messagesEndRef]);
 
+    const onDownloadFileUpload = async () => {
+      
+      try {
+        console.log(conversation);
+        const res = await fetch(`/api/files/?filename=${conversation.index.id}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        if (!res.ok) {
+          throw new Error(`download file failed:, ${conversation.index.id}`);
+        }
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+
+        //get full file name with extension from response header
+        const contentDisposition = res.headers.get('Content-Disposition');
+        console.log(contentDisposition);
+        const fileName = contentDisposition?.split('filename=')[1]?.replace(/"/g, '');
+        a.download = fileName ? fileName : conversation.index.id;
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+      } catch (e) {
+        console.log(e);
+      }
+      
+    };
+
+
     return (
       <>
         {isShowIndexFormTabs ? (
-          <IndexFormTabs keyConfiguration={keyConfiguration}
-                         handleKeyConfigurationValidation={handleKeyConfigurationValidation}
-                         handleShowIndexFormTabs={handleShowIndexFormTabs}/>
+          <IndexFormTabs
+            keyConfiguration={keyConfiguration}
+            handleKeyConfigurationValidation={handleKeyConfigurationValidation}
+            handleShowIndexFormTabs={handleShowIndexFormTabs}
+          />
         ) : (
           <div className="overflow-none relative flex-1 bg-white dark:bg-[#343541]">
             <>
@@ -128,20 +163,26 @@ export const Chat: FC<Props> = memo(
                 className="max-h-full overflow-x-hidden"
                 ref={chatContainerRef}
               >
-                {(conversation.index?.name.length === 0) && (conversation.messages.length === 0) ? (
+                {conversation.index?.name.length === 0 &&
+                conversation.messages.length === 0 ? (
                   <>
-                    <IndexGallery keyConfiguration={keyConfiguration}
-                                  handleKeyConfigurationValidation={handleKeyConfigurationValidation}
-                                  handleShowIndexFormTabs={handleShowIndexFormTabs}
-                                  onIndexChange={(index) =>
-                                    onUpdateConversation(conversation, {
-                                      key: 'index',
-                                      value: index,
-                                    })}/>
+                    <IndexGallery
+                      keyConfiguration={keyConfiguration}
+                      handleKeyConfigurationValidation={
+                        handleKeyConfigurationValidation
+                      }
+                      handleShowIndexFormTabs={handleShowIndexFormTabs}
+                      onIndexChange={(index) =>
+                        onUpdateConversation(conversation, {
+                          key: 'index',
+                          value: index,
+                        })
+                      }
+                    />
                   </>
                 ) : (
                   <>
-                    <div className="flex justify-center items-center border border-b-neutral-300 bg-neutral-20 py-2 text-lg text-neutral-500 dark:border-none dark:bg-[#444654] dark:text-neutral-200">
+                    <div className="bg-neutral-20 flex items-center justify-center border border-b-neutral-300 py-2 text-lg text-neutral-500 dark:border-none dark:bg-[#444654] dark:text-neutral-200">
                       {conversation.index.name}
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
@@ -151,14 +192,27 @@ export const Chat: FC<Props> = memo(
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                           <AlertDialogHeader>
-                            <AlertDialogTitle>Are you sure you want to clear all messages?</AlertDialogTitle>
+                            <AlertDialogTitle>
+                              Are you sure you want to clear all messages?
+                            </AlertDialogTitle>
                             <AlertDialogDescription>
-                              This action cannot be undone. This will permanently delete all messages in this conversation.
+                              This action cannot be undone. This will
+                              permanently delete all messages in this
+                              conversation.
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
                             <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction onClick={() => onUpdateConversation(conversation, {key: 'messages', value: []})}>Continue</AlertDialogAction>
+                            <AlertDialogAction
+                              onClick={() =>
+                                onUpdateConversation(conversation, {
+                                  key: 'messages',
+                                  value: [],
+                                })
+                              }
+                            >
+                              Continue
+                            </AlertDialogAction>
                           </AlertDialogFooter>
                         </AlertDialogContent>
                       </AlertDialog>
@@ -166,15 +220,35 @@ export const Chat: FC<Props> = memo(
 
                     <Card className="relative mx-auto mt-4 text-base md:max-w-2xl">
                       <CardHeader>
-                        <CardTitle>Quick tips</CardTitle>
-                        <CardDescription>Here are some good questions</CardDescription>
+                        <CardTitle>Outline</CardTitle>
+                        <CardDescription>
+                          Here outline of the conversation
+                        </CardDescription>
                       </CardHeader>
                       <CardContent>
-                        {conversation.index.questions?.map((question, index) => (
-                          <p className="mb-2 underline cursor-pointer" key={index} onClick={() => handleChatInputContent(question)}>{index+1}. {question}</p>
-                        ))}
+                        {conversation.index.questions?.map(
+                          (question, index) => (
+                            <p
+                              className="mb-2 cursor-pointer underline"
+                              key={index}
+                              onClick={() => handleChatInputContent(question)}
+                            >
+                              {index + 1}. {question}
+                            </p>
+                          ),
+                        )}
                       </CardContent>
                     </Card>
+
+                    <div className="bg-neutral-20 flex items-center justify-center border border-b-neutral-300 py-2 text-lg text-neutral-500 dark:border-none dark:bg-[#444654] dark:text-neutral-200">
+                      <Button variant="link" >
+                        <FileUp className="mr-2" /> Generate PPT
+                      </Button>
+
+                      <Button variant="link" onClick={() => onDownloadFileUpload()}>
+                        <FileUp className="mr-2" /> Download File Upload
+                      </Button>
+                    </div>
 
                     {conversation.messages.map((message, index) => (
                       <ChatMessage
@@ -185,7 +259,7 @@ export const Chat: FC<Props> = memo(
                       />
                     ))}
 
-                    {loading && <ChatLoader/>}
+                    {loading && <ChatLoader />}
 
                     <div
                       className="h-[162px] bg-white dark:bg-[#343541]"
@@ -209,7 +283,9 @@ export const Chat: FC<Props> = memo(
                     onSend(currentMessage, 2);
                   }
                 }}
-                handleKeyConfigurationValidation={handleKeyConfigurationValidation}
+                handleKeyConfigurationValidation={
+                  handleKeyConfigurationValidation
+                }
                 chatInputContent={chatInputContent}
                 handleChatInputContent={handleChatInputContent}
               />
