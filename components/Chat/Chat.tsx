@@ -174,7 +174,7 @@ export const Chat: FC<Props> = memo(
       let powerpoint = '';
       let response: Response;
       const controller = new AbortController();
-      let prompt = `
+      let prompt = `You are a part of a complex and accurate presentation generator that can
       create a power point script based on context, response should be in a JSON format similar to the following:
       {
           "title": "powerPointTitle",
