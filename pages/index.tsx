@@ -21,6 +21,7 @@ import {now} from "next-auth/client/_utils";
 
 interface HomeProps {
   serverSideApiKeyIsSet: boolean;
+  
 }
 
 const Home: React.FC<HomeProps> = ({serverSideApiKeyIsSet}) => {
