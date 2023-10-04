@@ -174,19 +174,18 @@ export const Chat: FC<Props> = memo(
       let powerpoint = '';
       let response: Response;
       const controller = new AbortController();
-      let prompt = `You are a part of a complex and accurate presentation generator that can
-      create a power point script based on context, response should be in a JSON format similar to the following:
+      let prompt = `Generate a PowerPoint presentation script in JSON format based on context. The script should have ${slideNum} slides, and each slide should contain between ${bulletMin} and ${bulletMax} bullet points. The JSON structure should be as follows:
       {
-          "title": "powerPointTitle",
-          "slides": [
-              {
-                  "title": "titleName",
-                  "content": [
-                      "string","string","string",...
-                  ]
-              },
-      ...}
-    Must be ${slideNum} slides long and each content array should have ${bulletMin}-${bulletMax} bullet points for the slide. ${extra}
+        "title": "powerPointTitle",
+        "slides": [
+            {
+                "title": "titleName",
+                "content": ["string1", "string2", "string3", ...]
+            },
+            ...
+        ]
+    }
+     ${extra}
       `;
 
       if (!handleKeyConfigurationValidation()) {
@@ -226,55 +225,32 @@ export const Chat: FC<Props> = memo(
       }
 
       const reader = response.body.getReader();
-      const stream = new ReadableStream({
-        start(controller) {
-          // The following function handles each data chunk
-          function push() {
-            // "done" is a Boolean and value a "Uint8Array"
-            reader.read().then(({ done, value }) => {
-              // Is there no more data to read?
-              if (done) {
-                // Tell the browser that we have finished sending data
-                controller.close();
-                return;
-              }
-
-              // Get the data and send it to the browser via the controller
-              controller.enqueue(value);
-              push();
-            });
-          }
-
-          push();
-        },
-      });
-
-      const responseStream = new Response(stream, {
-        headers: { 'Content-Type': 'text/html' },
-      });
-
-      const readerStream = responseStream.body?.getReader();
-      if (!readerStream) {
-        console.log('Reader stream is null');
-        return;
-      }
       const decoder = new TextDecoder();
-      let result = '';
       let done = false;
-      let value: any;
-      let chunk = '';
-      let index = 0;
+      let isFirst = true;
+      let text = '';
+
       while (!done) {
-        ({ done, value } = await readerStream.read());
-        if (done) {
+        if (stopConversationRef.current) {
+          controller.abort();
+          done = true;
           break;
         }
-        chunk = decoder.decode(value);
-        result += chunk;
-        index++;
+        const {value, done: doneReading} = await reader.read();
+        done = doneReading;
+        const chunkValue = decoder.decode(value);
+
+        text += chunkValue;
+
+        if (isFirst) {
+          console.log('chat success: ', text);
+          isFirst = false;
+        }
       }
-      console.log(result);
-      powerpoint = JSON.parse(result.replace('\n', ''));
+      await reader.cancel();
+
+      console.log(text);
+      powerpoint = JSON.parse(text.replace('\n', ''));
       return powerpoint;
     };
 
