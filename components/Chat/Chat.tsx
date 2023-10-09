@@ -174,19 +174,33 @@ export const Chat: FC<Props> = memo(
       let powerpoint = '';
       let response: Response;
       const controller = new AbortController();
-      let prompt = `Generate a PowerPoint presentation script in JSON format based on context. The script should have ${slideNum} slides, and each slide should contain between ${bulletMin} and ${bulletMax} bullet points. The JSON structure should be as follows:
+      let prompt = `
+      create a power point script based on context, response should be in a JSON format similar to the following:
       {
-        "title": "powerPointTitle",
-        "slides": [
-            {
-                "title": "titleName",
-                "content": ["string1", "string2", "string3", ...]
-            },
-            ...
-        ]
-    }
-     ${extra}
+          "title": "powerPointTitle",
+          "slides": [
+              {
+                  "title": "titleName",
+                  "content": [
+                      "string","string","string",...
+                  ]
+              },
+      ...}
+    Must be ${slideNum} slides long and each content array should have ${bulletMin}-${bulletMax} bullet points for the slide. ${extra}
       `;
+    //   let prompt = `Generate a PowerPoint presentation script in JSON format. The script should have ${slideNum} slides, and each slide should contain between ${bulletMin} and ${bulletMax} bullet points. The JSON structure should be as follows:
+    //   {
+    //     "title": "powerPointTitle",
+    //     "slides": [
+    //         {
+    //             "title": "titleName",
+    //             "content": ["string1", "string2", "string3", ...]
+    //         },
+    //         ...
+    //     ]
+    // }
+    //  ${extra}
+    //   `;
 
       if (!handleKeyConfigurationValidation()) {
         return;
