@@ -13,7 +13,7 @@ import { IndexFormTabs } from '@/components/Chat/IndexFormTabs';
 import { Button } from '@/components/ui/button';
 import { Eraser, FileUp, Heart } from 'lucide-react';
 import pptxgen from 'pptxgenjs';
-import {Progress} from "../ui/progress";
+import { Progress } from '../ui/progress';
 
 import {
   AlertDialog,
@@ -159,7 +159,7 @@ export const Chat: FC<Props> = memo(
         a.click();
         a.remove();
         window.URL.revokeObjectURL(url);
-      } catch (e) {        
+      } catch (e) {
         console.log(e);
         alert('file upload tidak ditemukan!!');
       }
@@ -188,19 +188,19 @@ export const Chat: FC<Props> = memo(
       ...}
     Must be ${slideNum} slides long and each content array should have ${bulletMin}-${bulletMax} bullet points for the slide. ${extra}
       `;
-    //   let prompt = `Generate a PowerPoint presentation script in JSON format. The script should have ${slideNum} slides, and each slide should contain between ${bulletMin} and ${bulletMax} bullet points. The JSON structure should be as follows:
-    //   {
-    //     "title": "powerPointTitle",
-    //     "slides": [
-    //         {
-    //             "title": "titleName",
-    //             "content": ["string1", "string2", "string3", ...]
-    //         },
-    //         ...
-    //     ]
-    // }
-    //  ${extra}
-    //   `;
+      //   let prompt = `Generate a PowerPoint presentation script in JSON format. The script should have ${slideNum} slides, and each slide should contain between ${bulletMin} and ${bulletMax} bullet points. The JSON structure should be as follows:
+      //   {
+      //     "title": "powerPointTitle",
+      //     "slides": [
+      //         {
+      //             "title": "titleName",
+      //             "content": ["string1", "string2", "string3", ...]
+      //         },
+      //         ...
+      //     ]
+      // }
+      //  ${extra}
+      //   `;
 
       if (!handleKeyConfigurationValidation()) {
         return;
@@ -250,7 +250,7 @@ export const Chat: FC<Props> = memo(
           done = true;
           break;
         }
-        const {value, done: doneReading} = await reader.read();
+        const { value, done: doneReading } = await reader.read();
         done = doneReading;
         const chunkValue = decoder.decode(value);
 
@@ -311,13 +311,11 @@ export const Chat: FC<Props> = memo(
         await pres.writeFile({
           fileName: `${powerpoint.title}.pptx`,
         });
-
       } catch (err) {
         console.log('error:', err);
         setIsUploading(false);
         setIsUploadSuccess(false);
         alert('Generate PPT gagal. Content tidak sesuai.');
-
       } finally {
         setIsUploading(false);
         setIsUploadSuccess(true);
@@ -414,21 +412,16 @@ export const Chat: FC<Props> = memo(
                             </p>
                           ),
                         )}
-                      </CardContent>
-                    </Card>
 
-                    <div className="bg-neutral-20 flex items-center justify-center border border-b-neutral-300 py-2 text-lg text-neutral-500 dark:border-none dark:bg-[#444654] dark:text-neutral-200">
-                      <>
                         {isUploading ? (
                           <>
                             <Progress
                               value={uploadProgress}
-                              className="ml-16 w-[60%]"
+                              className="ml-16 w-[75%]"
                             />
                           </>
                         ) : (
                           <>
-                        
                             <Button
                               variant="link"
                               onClick={() => generatePowerPoint()}
@@ -443,8 +436,8 @@ export const Chat: FC<Props> = memo(
                             </Button>
                           </>
                         )}
-                      </>
-                    </div>
+                      </CardContent>
+                    </Card>                   
 
                     {conversation.messages.map((message, index) => (
                       <ChatMessage
