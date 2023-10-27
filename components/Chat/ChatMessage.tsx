@@ -82,6 +82,15 @@ export const ChatMessage: FC<Props> = memo(
           utterance.voice = voices[0];
         }
         window.speechSynthesis.speak(utterance);
+        let r = setInterval(() => {
+          console.log(speechSynthesis.speaking);
+          if (!speechSynthesis.speaking) {
+            clearInterval(r);
+          } else {
+            speechSynthesis.pause();
+            speechSynthesis.resume();
+          }
+        }, 14000);
         setSpeaking(true);
       }
     };
