@@ -354,7 +354,7 @@ export const Chat: FC<Props> = memo(
                   </>
                 ) : (
                   <>
-                    <div className="bg-neutral-20 flex items-center justify-center border border-b-neutral-300 py-2 text-lg text-neutral-500 dark:border-none dark:bg-[#444654] dark:text-neutral-200">
+                   <div className="bg-neutral-20 flex items-center justify-center border border-b-neutral-300 py-2 text-lg text-neutral-500 dark:border-none dark:bg-[#444654] dark:text-neutral-200">
                       {conversation.index.name}
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
