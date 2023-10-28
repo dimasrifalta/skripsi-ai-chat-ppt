@@ -332,7 +332,7 @@ export const Chat: FC<Props> = memo(
             handleShowIndexFormTabs={handleShowIndexFormTabs}
           />
         ) : (
-          <div className="overflow-none relative flex-1 bg-white dark:bg-[#343541]">
+          <div className="overflow-visible relative flex-1 bg-white dark:bg-[#343541]">
             <>
               <div
                 className="max-h-full overflow-x-hidden"
