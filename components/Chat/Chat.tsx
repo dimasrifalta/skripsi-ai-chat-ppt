@@ -1,5 +1,5 @@
 import { throttle } from '@/utils';
-import { IconClearAll } from '@tabler/icons-react';
+import { IconClearAll, IconDots } from '@tabler/icons-react';
 import { useTranslation } from 'next-i18next';
 import { FC, memo, MutableRefObject, useEffect, useRef, useState } from 'react';
 import { ChatInput } from './ChatInput';
@@ -91,12 +91,12 @@ export const Chat: FC<Props> = memo(
       setChatInputContent(content);
     };
 
-    useEffect(() => {
-      const interval = setInterval(() => {
-        setUploadProgress((progress) => (progress + 1) % 101);
-      }, 50);
-      return () => clearInterval(interval);
-    }, []);
+    // useEffect(() => {
+    //   const interval = setInterval(() => {
+    //     setUploadProgress((progress) => (progress + 1) % 101);
+    //   }, 50);
+    //   return () => clearInterval(interval);
+    // }, []);
 
     useEffect(() => {
       throttledScrollDown();
@@ -332,9 +332,12 @@ export const Chat: FC<Props> = memo(
             handleShowIndexFormTabs={handleShowIndexFormTabs}
           />
         ) : (
-          <div className="relative flex-1 overflow-visible bg-white dark:bg-[#343541]">
+          <div className="overflow-none relative flex-1 bg-white dark:bg-[#343541]">
             <>
-              <div className="max-h-full overflow-auto" ref={chatContainerRef}>
+              <div
+                className="max-h-full overflow-x-hidden"
+                ref={chatContainerRef}
+              >
                 {conversation.index?.name.length === 0 &&
                 conversation.messages.length === 0 ? (
                   <>
@@ -354,7 +357,7 @@ export const Chat: FC<Props> = memo(
                   </>
                 ) : (
                   <>
-                   <div className="bg-neutral-20 flex items-center justify-center border border-b-neutral-300 py-2 text-lg text-neutral-500 dark:border-none dark:bg-[#444654] dark:text-neutral-200">
+                    <div className="bg-neutral-20 flex items-center justify-center border border-b-neutral-300 py-2 text-lg text-neutral-500 dark:border-none dark:bg-[#444654] dark:text-neutral-200">
                       {conversation.index.name}
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
@@ -412,10 +415,7 @@ export const Chat: FC<Props> = memo(
 
                         {isUploading ? (
                           <>
-                            <Progress
-                              value={uploadProgress}
-                              className="ml-16 w-[75%]"
-                            />
+                            Generating<IconDots className="animate-pulse" /> 
                           </>
                         ) : (
                           <>
@@ -434,7 +434,7 @@ export const Chat: FC<Props> = memo(
                           </>
                         )}
                       </CardContent>
-                    </Card>
+                    </Card>                   
 
                     {conversation.messages.map((message, index) => (
                       <ChatMessage
