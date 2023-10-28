@@ -332,12 +332,9 @@ export const Chat: FC<Props> = memo(
             handleShowIndexFormTabs={handleShowIndexFormTabs}
           />
         ) : (
-          <div className="overflow-visible relative flex-1 bg-white dark:bg-[#343541]">
+          <div className="relative flex-1 overflow-visible bg-white dark:bg-[#343541]">
             <>
-              <div
-                className="max-h-full overflow-x-hidden"
-                ref={chatContainerRef}
-              >
+              <div className="max-h-full overflow-auto" ref={chatContainerRef}>
                 {conversation.index?.name.length === 0 &&
                 conversation.messages.length === 0 ? (
                   <>
@@ -437,7 +434,7 @@ export const Chat: FC<Props> = memo(
                           </>
                         )}
                       </CardContent>
-                    </Card>                   
+                    </Card>
 
                     {conversation.messages.map((message, index) => (
                       <ChatMessage
