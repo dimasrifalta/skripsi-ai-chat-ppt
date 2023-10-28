@@ -58,12 +58,32 @@ export const ChatMessage: FC<Props> = memo(
     const copyOnClick = () => {
       if (!navigator.clipboard) return;
 
-      navigator.clipboard.writeText(message.content).then(() => {
+      // navigator.clipboard.writeText(message.content).then(() => {
+      //   setMessageCopied(true);
+      //   setTimeout(() => {
+      //     setMessageCopied(false);
+      //   }, 2000);
+      // });
+
+      if (!navigator.clipboard) return;
+      const textToCopy = message.content; // Replace with your text
+
+      const textArea = document.createElement('textarea');
+      textArea.value = textToCopy;
+      document.body.appendChild(textArea);
+      textArea.select();
+
+      try {
+        document.execCommand('copy');
         setMessageCopied(true);
         setTimeout(() => {
           setMessageCopied(false);
         }, 2000);
-      });
+      } catch (err) {
+        console.error('Unable to copy text:', err);
+      } finally {
+        document.body.removeChild(textArea);
+      }
     };
 
     const speechOnToggle = () => {
@@ -82,15 +102,6 @@ export const ChatMessage: FC<Props> = memo(
           utterance.voice = voices[0];
         }
         window.speechSynthesis.speak(utterance);
-        let r = setInterval(() => {
-          console.log(speechSynthesis.speaking);
-          if (!speechSynthesis.speaking) {
-            clearInterval(r);
-          } else {
-            speechSynthesis.pause();
-            speechSynthesis.resume();
-          }
-        }, 14000);
         setSpeaking(true);
       }
     };
