@@ -56,7 +56,7 @@ export const ChatMessage: FC<Props> = memo(
     };
 
     const copyOnClick = () => {
-      if (!navigator.clipboard) return;
+      // if (!navigator.clipboard) return;
 
       // navigator.clipboard.writeText(message.content).then(() => {
       //   setMessageCopied(true);
@@ -65,7 +65,7 @@ export const ChatMessage: FC<Props> = memo(
       //   }, 2000);
       // });
 
-      if (!navigator.clipboard) return;
+      // if (!navigator.clipboard) return;
       const textToCopy = message.content; // Replace with your text
 
       const textArea = document.createElement('textarea');
