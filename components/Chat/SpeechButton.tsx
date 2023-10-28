@@ -19,7 +19,6 @@ export const SpeechButton: FC<Props> = ({ speaking, speechOnToggle }) => (
         size={20} 
         className="text-green-500 dark:text-green-400"
         onClick={speechOnToggle}
-        color={'#ffffff'}
       />
     ) : (
       <IconSpeakerphone 
